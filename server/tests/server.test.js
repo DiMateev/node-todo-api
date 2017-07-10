@@ -293,3 +293,30 @@ describe('POST /users/login', () => {
       });
   });
 });
+
+describe('DELETE /users/me/token', () => {
+  it('should delete token if exist', (done) => {
+    request(app)
+      .delete('/users/me/token')
+      .set('x-auth', users[0].tokens[0].token)
+      .expect(200)
+      .end((err, res) => {
+        if (err) {
+          done(err);
+        }
+
+        User.findById(users[0]._id).then((user) => {
+          expect(user.tokens.length).toBe(0);
+          done();
+        }).catch((e) => done(e));
+      });
+  });
+
+  it('should return 401 if token does not exist', (done) => {
+    request(app)
+      .delete('/users/me/token')
+      .set('x-auth', '12345')
+      .expect(401)
+      .end(done);
+  });
+});
